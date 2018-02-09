@@ -20,7 +20,7 @@ class TDMKTwitchAuthActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_twitch_auth)
 
-        title = "登录 Twitch 以获取 Token"
+        title = "登录Twitch (要梯子)"
 
         authWebView = findViewById(R.id.authView)
 
