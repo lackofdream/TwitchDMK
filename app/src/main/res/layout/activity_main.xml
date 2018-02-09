@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.lackofdream.lab.twitchdmkdemo.MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingEnd="16dp"
+        android:paddingStart="16dp"
+        android:paddingTop="16dp">
+
+        <EditText
+            android:id="@+id/ircName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="text"
+            android:hint="Twitch用户名（小写）" />
+        <EditText
+            android:id="@+id/ircChannel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="text"
+            android:hint="Twitch主播名（小写）" />
+        <Button
+            android:id="@+id/authBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="验证" />
+
+        <EditText
+            android:id="@+id/ircToken"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="text"
+            android:hint="Token" />
+
+        <ToggleButton
+            android:id="@+id/ircBtn"
+            android:layout_width="match_parent"
+            android:textOff="聊天室 - 关"
+            android:textOn="聊天室 - 开"
+            android:layout_height="wrap_content" />
+
+        <ToggleButton
+            android:id="@+id/overlayBtn"
+            android:layout_width="match_parent"
+            android:textOff="弹幕图层 - 关"
+            android:textOn="弹幕图层 - 开"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/sendDanmaku"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="撃て" />
+
+
+    </LinearLayout>
+
+
+</android.support.constraint.ConstraintLayout>
