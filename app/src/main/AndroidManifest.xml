@@ -27,7 +27,6 @@
         <service android:name="com.lackofdream.lab.twitchdmk.TDMKOverlayService" />
         <service android:name="com.lackofdream.lab.twitchdmk.TDMKTwitchIRCService" />
 
-        <activity android:name="com.lackofdream.lab.twitchdmk.TDMKTwitchAuthActivity" />
     </application>
 
 </manifest>

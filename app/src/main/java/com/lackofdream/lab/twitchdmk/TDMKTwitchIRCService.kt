@@ -16,8 +16,6 @@ import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SEND_DANMAKU
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.EXTRA_DANMAKU_TEXT
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_IRC_CHANNEL
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_IRC_ENABLED
-import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_IRC_TOKEN
-import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_IRC_USERNAME
 import org.pircbotx.Configuration
 import org.pircbotx.PircBotX
 import org.pircbotx.cap.EnableCapHandler
@@ -49,16 +47,16 @@ class TDMKTwitchIRCService : Service() {
         return null
     }
 
-    fun createNotificationBuild(context: Context, channel: String): NotificationCompat.Builder {
+    private fun createNotificationBuild(context: Context, channel: String): NotificationCompat.Builder {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationCompat.Builder(applicationContext, NOTIFY_CHANNEL_ID)
+            NotificationCompat.Builder(context, channel)
         } else {
             @Suppress("DEPRECATION")
-            NotificationCompat.Builder(applicationContext)
+            NotificationCompat.Builder(context)
         }
     }
 
-    fun initNotification() {
+    private fun initNotification() {
 
 
         mNotificationmanager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -81,13 +79,15 @@ class TDMKTwitchIRCService : Service() {
 
     }
 
+    private fun getRandomLoginName(): String {
+        val ret = String.format("%08d", Math.abs(Random().nextInt()) % 100000000)
+        Log.i("TDMK-IRC-RANDOM-NAME", ret)
+        return "justinfan114514$ret"
+    }
+
     override fun onCreate() {
         super.onCreate()
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        if (prefs.getString(PREF_IRC_USERNAME, "").isEmpty()) {
-            stopSelf()
-            return
-        }
 
         irc_service_on = true
         initNotification()
@@ -99,10 +99,10 @@ class TDMKTwitchIRCService : Service() {
                 .setAutoReconnectAttempts(15)
                 .setOnJoinWhoEnabled(false)
                 .setCapEnabled(true)
-                .addCapHandlers(listOf(EnableCapHandler("twitch.tv/membership"), EnableCapHandler("twitch.tv/tags"), EnableCapHandler("twitch.tv/commands")))
+                .addCapHandlers(listOf(EnableCapHandler("twitch.tv/membership"), EnableCapHandler("twitch.tv/tags")))
                 .addServer("irc.chat.twitch.tv", 6667)
-                .setName(prefs.getString(PREF_IRC_USERNAME, ""))
-                .setServerPassword(prefs.getString(PREF_IRC_TOKEN, ""))
+                .setName(getRandomLoginName())
+                .setServerPassword("kappa")
                 .addAutoJoinChannel("#${prefs.getString(PREF_IRC_CHANNEL, "")}")
                 .addListener(object : ListenerAdapter() {
                     override fun onDisconnect(event: DisconnectEvent?) {

@@ -152,7 +152,7 @@ class TDMKOverlayService : Service() {
         danmaku.priority = 1
         danmaku.isLive = true
         danmaku.time = mDanmakuView.currentTime
-        danmaku.textSize = 25f * (resources.displayMetrics.density - 0.6f);
+        danmaku.textSize = 25f * (resources.displayMetrics.density - 0.6f)
         danmaku.textColor = Color.WHITE
         danmaku.textShadowColor = Color.BLACK
         mDanmakuView.addDanmaku(danmaku)
