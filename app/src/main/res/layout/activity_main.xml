@@ -49,7 +49,7 @@
                     android:ems="10"
                     android:enabled="false"
                     android:hint="Token"
-                    android:inputType="text" />
+                    android:inputType="textPassword" />
             </LinearLayout>
 
 
@@ -148,7 +148,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:textSize="18dp"
-                android:text="使用帮助：\n1. 点击“验证”，登录Twitch\n2. 填写主播名\n3.开启聊天室和弹幕图层" />
+                android:text="使用帮助：\n1. 点击“验证”，登录Twitch\n2. 填写主播名\n3. 开启聊天室和弹幕图层" />
             <TextView
                 android:id="@+id/overlayWarn"
                 android:layout_width="match_parent"
