@@ -1,4 +1,4 @@
-package com.lackofdream.lab.twitchdmkdemo
+package com.lackofdream.lab.twitchdmk
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -8,8 +8,8 @@ import android.support.v7.app.AppCompatActivity
 import android.webkit.CookieManager
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import com.lackofdream.lab.twitchdmkdemo.TDMKConstants.Companion.RESULT_IRC_TOKEN
-import com.lackofdream.lab.twitchdmkdemo.TDMKConstants.Companion.RESULT_IRC_USERNAME
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.RESULT_IRC_TOKEN
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.RESULT_IRC_USERNAME
 
 class TDMKTwitchAuthActivity : AppCompatActivity() {
 

@@ -4,136 +4,165 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.lackofdream.lab.twitchdmkdemo.MainActivity">
+    tools:context="com.lackofdream.lab.twitchdmk.MainActivity">
 
-    <LinearLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        android:paddingEnd="16dp"
-        android:paddingStart="16dp"
-        android:paddingTop="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
 
-        <Button
-            android:id="@+id/authBtn"
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="验证" />
+            android:orientation="vertical"
+            android:paddingEnd="16dp"
+            android:paddingStart="16dp"
+            android:paddingTop="16dp">
+
+            <Button
+                android:id="@+id/authBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="验证" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight=".3"
+                    android:gravity="center"
+                    android:text="Token"
+                    android:textAlignment="center"
+                    android:textSize="24dp" />
+
+                <EditText
+                    android:id="@+id/ircToken"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight=".7"
+                    android:ems="10"
+                    android:enabled="false"
+                    android:hint="Token"
+                    android:inputType="text" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight=".3"
+                    android:gravity="center"
+                    android:text="用户名"
+                    android:textAlignment="center"
+                    android:textSize="24dp" />
+
+                <EditText
+                    android:id="@+id/ircName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight=".7"
+                    android:ems="10"
+                    android:enabled="false"
+                    android:hint="Twitch用户名"
+                    android:inputType="text" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:layout_marginBottom="2dp"
+                android:layout_marginTop="2dp"
+                android:background="@android:color/darker_gray" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight=".3"
+                    android:gravity="center"
+                    android:text="主播名"
+                    android:textAlignment="center"
+                    android:textSize="24dp" />
+
+                <EditText
+                    android:id="@+id/ircChannel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight=".7"
+                    android:ems="10"
+                    android:hint="Twitch主播名（小写）"
+                    android:inputType="text" />
+            </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:weightSum="1">
-
-            <TextView
+            android:weightSum="1"
+            android:padding="5dp">
+            <ToggleButton
+                android:id="@+id/ircBtn"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight=".3"
-                android:gravity="center"
-                android:text="Token"
-                android:textAlignment="center"
-                android:textSize="24dp" />
-
-            <EditText
-                android:id="@+id/ircToken"
-                android:layout_width="0dp"
+                android:layout_weight=".5"
                 android:layout_height="wrap_content"
-                android:layout_weight=".7"
-                android:ems="10"
-                android:enabled="false"
-                android:hint="Token"
-                android:inputType="text" />
+                android:textOff="聊天室 - 关"
+                android:textOn="聊天室 - 开" />
+
+            <ToggleButton
+                android:id="@+id/overlayBtn"
+                android:layout_width="0dp"
+                android:layout_weight=".5"
+                android:layout_height="wrap_content"
+                android:textOff="弹幕图层 - 关"
+                android:textOn="弹幕图层 - 开" />
         </LinearLayout>
 
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="1">
+            <Button
+                android:id="@+id/sendDanmaku"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="撃て"
+                android:visibility="gone" />
 
             <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight=".3"
-                android:gravity="center"
-                android:text="用户名"
-                android:textAlignment="center"
-                android:textSize="24dp" />
-
-            <EditText
-                android:id="@+id/ircName"
-                android:layout_width="0dp"
+                android:id="@+id/helpText"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight=".7"
-                android:ems="10"
-                android:enabled="false"
-                android:hint="Twitch用户名"
-                android:inputType="text" />
-
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="3dp"
-            android:layout_marginBottom="2dp"
-            android:layout_marginTop="2dp"
-            android:background="@android:color/darker_gray" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="1">
-
+                android:layout_marginTop="20dp"
+                android:textSize="18dp"
+                android:text="使用帮助：\n1. 点击“验证”，登录Twitch\n2. 填写主播名\n3.开启聊天室和弹幕图层" />
             <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight=".3"
-                android:gravity="center"
-                android:text="主播名"
-                android:textAlignment="center"
-                android:textSize="24dp" />
-
-            <EditText
-                android:id="@+id/ircChannel"
-                android:layout_width="0dp"
+                android:id="@+id/overlayWarn"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight=".7"
-                android:ems="10"
-                android:hint="Twitch主播名（小写）"
-                android:inputType="text" />
+                android:background="#ffafaf"
+                android:layout_marginTop="20dp"
+                android:textSize="16dp"
+                android:padding="5dp"
+                android:text="弹幕功能需要取得悬浮视窗权限\n请至 应用设定 > 允许悬浮视窗 的相关设定"
+                android:visibility="gone"/>
         </LinearLayout>
 
-        <ToggleButton
-            android:id="@+id/ircBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textOff="聊天室 - 关"
-            android:textOn="聊天室 - 开" />
+    </ScrollView>
 
-        <ToggleButton
-            android:id="@+id/overlayBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textOff="弹幕图层 - 关"
-            android:textOn="弹幕图层 - 开" />
-
-        <Button
-            android:id="@+id/sendDanmaku"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="撃て"
-            android:visibility="gone" />
-
-
-    </LinearLayout>
 
 
 </android.support.constraint.ConstraintLayout>

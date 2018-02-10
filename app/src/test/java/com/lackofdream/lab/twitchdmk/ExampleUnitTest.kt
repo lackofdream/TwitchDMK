@@ -1,4 +1,4 @@
-package com.lackofdream.lab.twitchdmkdemo
+package com.lackofdream.lab.twitchdmk
 
 import org.junit.Test
 

@@ -1,4 +1,4 @@
-package com.lackofdream.lab.twitchdmkdemo
+package com.lackofdream.lab.twitchdmk
 
 import android.annotation.SuppressLint
 import android.app.Service
@@ -15,12 +15,12 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
-import com.lackofdream.lab.twitchdmkdemo.TDMKConstants.Companion.ACTION_HIDE_OVERLAY
-import com.lackofdream.lab.twitchdmkdemo.TDMKConstants.Companion.ACTION_SEND_DANMAKU
-import com.lackofdream.lab.twitchdmkdemo.TDMKConstants.Companion.ACTION_SHOW_OVERLAY
-import com.lackofdream.lab.twitchdmkdemo.TDMKConstants.Companion.EXTRA_DANMAKU_TEXT
-import com.lackofdream.lab.twitchdmkdemo.TDMKConstants.Companion.PREF_OVERLAY_ENABLED
-import com.lackofdream.lab.twitchdmkdemo.TDMKUtils.Companion.getWindowLayoutType
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_HIDE_OVERLAY
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SEND_DANMAKU
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SHOW_OVERLAY
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.EXTRA_DANMAKU_TEXT
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_OVERLAY_ENABLED
+import com.lackofdream.lab.twitchdmk.TDMKUtils.Companion.getWindowLayoutType
 import master.flame.danmaku.danmaku.model.BaseDanmaku
 import master.flame.danmaku.danmaku.model.DanmakuTimer
 import master.flame.danmaku.danmaku.model.IDanmakus
@@ -67,8 +67,7 @@ class TDMKOverlayService : Service() {
                 }
             }
         }
-
-
+        
         return super.onStartCommand(intent, flags, startId)
     }
 
@@ -86,7 +85,6 @@ class TDMKOverlayService : Service() {
                 .setScrollSpeedFactor(1.2f)
                 .setScaleTextSize(1.2f)
                 .preventOverlapping(overlappingEnablePair)
-                .setDanmakuMargin(20)
         mDanmakuView.setCallback(object : master.flame.danmaku.controller.DrawHandler.Callback {
             override fun drawingFinished() {
             }
@@ -107,6 +105,12 @@ class TDMKOverlayService : Service() {
                 return Danmakus()
             }
         }, mDanmakuContext)
+
+        Timer().schedule(object: TimerTask() {
+            override fun run() {
+                addDanmaku("弹幕图层准备就绪")
+            }
+        }, 200)
     }
 
     @SuppressLint("InflateParams")
@@ -144,11 +148,11 @@ class TDMKOverlayService : Service() {
         val danmaku = mDanmakuContext.mDanmakuFactory.createDanmaku(BaseDanmaku.TYPE_SCROLL_RL) ?: return
 
         danmaku.text = text
-        danmaku.padding = 5
-        danmaku.priority = 0
+        danmaku.padding = 3
+        danmaku.priority = 1
         danmaku.isLive = true
         danmaku.time = mDanmakuView.currentTime
-        danmaku.textSize = 25f * 2f
+        danmaku.textSize = 25f * (resources.displayMetrics.density - 0.6f);
         danmaku.textColor = Color.WHITE
         danmaku.textShadowColor = Color.BLACK
         mDanmakuView.addDanmaku(danmaku)

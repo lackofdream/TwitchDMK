@@ -1,24 +1,28 @@
-package com.lackofdream.lab.twitchdmkdemo
+package com.lackofdream.lab.twitchdmk
 
 import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
+import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.provider.Settings
 import android.support.v7.app.AppCompatActivity
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.ToggleButton
-import com.lackofdream.lab.twitchdmkdemo.TDMKConstants.Companion.ACTION_SEND_DANMAKU
-import com.lackofdream.lab.twitchdmkdemo.TDMKConstants.Companion.EXTRA_DANMAKU_TEXT
-import com.lackofdream.lab.twitchdmkdemo.TDMKConstants.Companion.PREF_IRC_CHANNEL
-import com.lackofdream.lab.twitchdmkdemo.TDMKConstants.Companion.PREF_IRC_ENABLED
-import com.lackofdream.lab.twitchdmkdemo.TDMKConstants.Companion.PREF_IRC_TOKEN
-import com.lackofdream.lab.twitchdmkdemo.TDMKConstants.Companion.PREF_IRC_USERNAME
-import com.lackofdream.lab.twitchdmkdemo.TDMKConstants.Companion.PREF_OVERLAY_ENABLED
-import com.lackofdream.lab.twitchdmkdemo.TDMKConstants.Companion.REQUEST_IRC_TOKEN
-import com.lackofdream.lab.twitchdmkdemo.TDMKConstants.Companion.RESULT_IRC_TOKEN
-import com.lackofdream.lab.twitchdmkdemo.TDMKConstants.Companion.RESULT_IRC_USERNAME
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SEND_DANMAKU
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.EXTRA_DANMAKU_TEXT
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_IRC_CHANNEL
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_IRC_ENABLED
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_IRC_TOKEN
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_IRC_USERNAME
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_OVERLAY_ENABLED
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.REQUEST_IRC_TOKEN
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.RESULT_IRC_TOKEN
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.RESULT_IRC_USERNAME
 
 class MainActivity : AppCompatActivity() {
 
@@ -75,6 +79,10 @@ class MainActivity : AppCompatActivity() {
         authBtn.setOnClickListener({ _ ->
             startActivityForResult(Intent(applicationContext, TDMKTwitchAuthActivity::class.java), REQUEST_IRC_TOKEN)
         })
+        authBtn.setOnLongClickListener({_->
+            sendDanmakuBtn.visibility = View.VISIBLE
+            true
+        })
 
         ircToken = findViewById(R.id.ircToken)
         ircName = findViewById(R.id.ircName)
@@ -97,6 +105,7 @@ class MainActivity : AppCompatActivity() {
                 stopService(intent)
             }
         })
+
     }
 
     private fun setEditText() {
@@ -110,6 +119,15 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         title = "老鼠弹幕"
         overlayBtn.isChecked = prefs.getBoolean(PREF_OVERLAY_ENABLED, false)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                !Settings.canDrawOverlays(applicationContext)) {
+            findViewById<TextView>(R.id.overlayWarn).visibility = View.VISIBLE
+            prefs.edit().putBoolean(PREF_OVERLAY_ENABLED, false).apply()
+            overlayBtn.isEnabled = false
+        } else {
+            findViewById<TextView>(R.id.overlayWarn).visibility = View.GONE
+            overlayBtn.isEnabled = true
+        }
         ircBtn.isChecked = prefs.getBoolean(PREF_IRC_ENABLED, false)
         setEditText()
     }

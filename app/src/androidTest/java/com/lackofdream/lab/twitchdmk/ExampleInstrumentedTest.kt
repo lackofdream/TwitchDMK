@@ -1,4 +1,4 @@
-package com.lackofdream.lab.twitchdmkdemo
+package com.lackofdream.lab.twitchdmk
 
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
