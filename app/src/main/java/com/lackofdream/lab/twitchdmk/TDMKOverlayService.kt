@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Build
@@ -17,8 +18,11 @@ import android.view.View
 import android.view.WindowManager
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_HIDE_OVERLAY
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SEND_DANMAKU
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SET_TRANSPARENCY
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SHOW_OVERLAY
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.EXTRA_DANMAKU_SELF
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.EXTRA_DANMAKU_TEXT
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_DANMAKU_TRANSPARENCY
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_OVERLAY_ENABLED
 import com.lackofdream.lab.twitchdmk.TDMKUtils.Companion.getWindowLayoutType
 import master.flame.danmaku.danmaku.model.BaseDanmaku
@@ -44,6 +48,7 @@ class TDMKOverlayService : Service() {
     private lateinit var mParams: WindowManager.LayoutParams
     private lateinit var mDanmakuContext: DanmakuContext
     private lateinit var mDanmakuView: DanmakuView
+    private lateinit var prefs: SharedPreferences
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
@@ -63,28 +68,33 @@ class TDMKOverlayService : Service() {
                 }
                 ACTION_SEND_DANMAKU -> {
                     val text = intent.getStringExtra(EXTRA_DANMAKU_TEXT)
-                    addDanmaku(text)
+                    val self = intent.getBooleanExtra(EXTRA_DANMAKU_SELF, false)
+                    addDanmaku(text, self)
+                }
+                ACTION_SET_TRANSPARENCY -> {
+                    mDanmakuContext.setDanmakuTransparency(prefs.getInt(PREF_DANMAKU_TRANSPARENCY, 255).toFloat() / 255f)
+                    addDanmaku("透明度已变更", true)
                 }
             }
         }
-        
+
         return super.onStartCommand(intent, flags, startId)
     }
 
     @SuppressLint("UseSparseArrays")
     private fun initDanmakuConfig() {
         val overlappingEnablePair = HashMap<Int, Boolean>()
-        overlappingEnablePair.put(BaseDanmaku.TYPE_SCROLL_RL, false)
+        overlappingEnablePair.put(BaseDanmaku.TYPE_SCROLL_RL, true)
         overlappingEnablePair.put(BaseDanmaku.TYPE_FIX_TOP, true)
 
         mDanmakuView = mView.findViewById(R.id.danmaku)
         mDanmakuContext = DanmakuContext.create()
-        mDanmakuContext
-                .setDanmakuStyle(IDisplayer.DANMAKU_STYLE_STROKEN, 3f)
+                .setDanmakuStyle(IDisplayer.DANMAKU_STYLE_STROKEN, 3f * (resources.displayMetrics.density - 0.6f))
                 .setDuplicateMergingEnabled(false)
                 .setScrollSpeedFactor(1.2f)
                 .setScaleTextSize(1.2f)
                 .preventOverlapping(overlappingEnablePair)
+                .setDanmakuTransparency(prefs.getInt(PREF_DANMAKU_TRANSPARENCY, 255).toFloat() / 255f)
         mDanmakuView.setCallback(object : master.flame.danmaku.controller.DrawHandler.Callback {
             override fun drawingFinished() {
             }
@@ -106,9 +116,9 @@ class TDMKOverlayService : Service() {
             }
         }, mDanmakuContext)
 
-        Timer().schedule(object: TimerTask() {
+        Timer().schedule(object : TimerTask() {
             override fun run() {
-                addDanmaku("弹幕图层准备就绪")
+                addDanmaku("弹幕图层准备就绪", true)
             }
         }, 200)
     }
@@ -122,7 +132,7 @@ class TDMKOverlayService : Service() {
             stopSelf()
             return
         }
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        prefs = PreferenceManager.getDefaultSharedPreferences(this)
         if (!prefs.getBoolean(PREF_OVERLAY_ENABLED, false)) {
             stopSelf()
             return
@@ -144,17 +154,18 @@ class TDMKOverlayService : Service() {
     }
 
 
-    private fun addDanmaku(text: CharSequence) {
+    private fun addDanmaku(text: CharSequence, self: Boolean = false) {
         val danmaku = mDanmakuContext.mDanmakuFactory.createDanmaku(BaseDanmaku.TYPE_SCROLL_RL) ?: return
 
         danmaku.text = text
         danmaku.padding = 3
-        danmaku.priority = 1
+        danmaku.priority = if (self) 1 else 0
         danmaku.isLive = true
         danmaku.time = mDanmakuView.currentTime
-        danmaku.textSize = 25f * (resources.displayMetrics.density - 0.6f)
+        danmaku.textSize = 28f * (resources.displayMetrics.density - 0.6f)
         danmaku.textColor = Color.WHITE
         danmaku.textShadowColor = Color.BLACK
+        if (self) danmaku.borderColor = Color.GREEN
         mDanmakuView.addDanmaku(danmaku)
     }
 

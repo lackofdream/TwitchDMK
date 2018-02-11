@@ -13,6 +13,7 @@ import android.preference.PreferenceManager
 import android.support.v4.app.NotificationCompat
 import android.util.Log
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SEND_DANMAKU
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.EXTRA_DANMAKU_SELF
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.EXTRA_DANMAKU_TEXT
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_IRC_CHANNEL
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_IRC_ENABLED
@@ -71,6 +72,7 @@ class TDMKTwitchIRCService : Service() {
 
         mNotifyBuilder = createNotificationBuild(applicationContext, NOTIFY_CHANNEL_ID)
                 .setContentTitle("老鼠弹幕")
+                .setContentText("正在连接至Twitch聊天室…")
                 .setSmallIcon(R.drawable.ic_stat_sort)
                 .setAutoCancel(false)
                 .setContentIntent(PendingIntent.getActivity(this@TDMKTwitchIRCService, 0, Intent(this@TDMKTwitchIRCService, MainActivity::class.java), PendingIntent.FLAG_CANCEL_CURRENT))
@@ -80,7 +82,7 @@ class TDMKTwitchIRCService : Service() {
     }
 
     private fun getRandomLoginName(): String {
-        val ret = String.format("%08d", Math.abs(Random().nextInt()) % 100000000)
+        val ret = String.format("%06d", Math.abs(Random().nextInt()) % 1000000)
         Log.i("TDMK-IRC-RANDOM-NAME", ret)
         return "justinfan114514$ret"
     }
@@ -116,7 +118,7 @@ class TDMKTwitchIRCService : Service() {
 
                     override fun onMessage(event: MessageEvent?) {
                         if (event == null) return
-                        val intent = Intent(applicationContext, TDMKOverlayService::class.java).setAction(ACTION_SEND_DANMAKU).putExtra(EXTRA_DANMAKU_TEXT, event.message)
+                        val intent = Intent(applicationContext, TDMKOverlayService::class.java).setAction(ACTION_SEND_DANMAKU).putExtra(EXTRA_DANMAKU_TEXT, event.message).putExtra(EXTRA_DANMAKU_SELF, false)
                         startService(intent)
                     }
 

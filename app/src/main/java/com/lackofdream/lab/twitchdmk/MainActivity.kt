@@ -8,15 +8,16 @@ import android.preference.PreferenceManager
 import android.provider.Settings
 import android.support.v7.app.AppCompatActivity
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.ToggleButton
+import android.widget.*
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SEND_DANMAKU
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SET_TRANSPARENCY
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.EXTRA_DANMAKU_SELF
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.EXTRA_DANMAKU_TEXT
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_DANMAKU_TRANSPARENCY
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_IRC_CHANNEL
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_IRC_ENABLED
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_OVERLAY_ENABLED
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,6 +26,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sendDanmakuBtn: Button
     private lateinit var ircBtn: ToggleButton
     private lateinit var ircChannel: EditText
+    private lateinit var transparencyBar: SeekBar
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,9 +47,7 @@ class MainActivity : AppCompatActivity() {
 
         sendDanmakuBtn = findViewById(R.id.sendDanmaku)
         sendDanmakuBtn.setOnClickListener({ _ ->
-            val danmakuIntent = Intent(applicationContext, TDMKOverlayService::class.java)
-            danmakuIntent.putExtra(EXTRA_DANMAKU_TEXT, "対潜部隊との訓練もいいけど、大事な実戦にも出てみたい！　ねぇ、提督？　聞いてる？　むー、聞いてなーい！")
-            danmakuIntent.action = ACTION_SEND_DANMAKU
+            val danmakuIntent = Intent(applicationContext, TDMKOverlayService::class.java).putExtra(EXTRA_DANMAKU_TEXT, "対潜部隊との訓練もいいけど、大事な実戦にも出てみたい！　ねぇ、提督？　聞いてる？　むー、聞いてなーい！").setAction(ACTION_SEND_DANMAKU).putExtra(EXTRA_DANMAKU_SELF, true)
             startService(danmakuIntent)
         })
 
@@ -76,6 +76,32 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        transparencyBar = findViewById(R.id.seekBar)
+        transparencyBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            private var timer = Timer()
+
+            override fun onProgressChanged(p0: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    prefs.edit().putInt(PREF_DANMAKU_TRANSPARENCY, progress).apply()
+                    val intent = Intent(applicationContext, TDMKOverlayService::class.java).setAction(ACTION_SET_TRANSPARENCY)
+                    timer.cancel()
+                    timer = Timer()
+                    timer.schedule(object : TimerTask() {
+                        override fun run() {
+                            startService(intent)
+                        }
+                    }, 200)
+
+                }
+            }
+
+            override fun onStartTrackingTouch(p0: SeekBar?) {
+            }
+
+            override fun onStopTrackingTouch(p0: SeekBar?) {
+            }
+        })
+
     }
 
     private fun setEditText() {
@@ -97,6 +123,7 @@ class MainActivity : AppCompatActivity() {
             overlayBtn.isEnabled = true
         }
         ircBtn.isChecked = prefs.getBoolean(PREF_IRC_ENABLED, false)
+        transparencyBar.progress = prefs.getInt(PREF_DANMAKU_TRANSPARENCY, 255)
         setEditText()
     }
 }
