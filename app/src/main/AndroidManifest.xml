@@ -13,20 +13,19 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.lackofdream.lab.twitchdmk.MainActivity"
+            android:name=".MainActivity"
             android:configChanges="">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-
-
             </intent-filter>
         </activity>
 
-        <service android:name="com.lackofdream.lab.twitchdmk.TDMKOverlayService" />
-        <service android:name="com.lackofdream.lab.twitchdmk.TDMKTwitchIRCService" />
+        <service android:name=".TDMKOverlayService" />
+        <service android:name=".TDMKTwitchIRCService" />
 
+        <activity android:name=".TDMKTwitchAuthActivity"/>
     </application>
 
 </manifest>

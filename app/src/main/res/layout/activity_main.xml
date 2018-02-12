@@ -46,36 +46,99 @@
                     android:inputType="text" />
             </LinearLayout>
 
-            <LinearLayout
+            <ToggleButton
+                android:id="@+id/serviceBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="5dp"
-                android:weightSum="1">
-
-                <ToggleButton
-                    android:id="@+id/ircBtn"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight=".5"
-                    android:textOff="聊天室 - 关"
-                    android:textOn="聊天室 - 开" />
-
-                <ToggleButton
-                    android:id="@+id/overlayBtn"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight=".5"
-                    android:textOff="弹幕图层 - 关"
-                    android:textOn="弹幕图层 - 开" />
-            </LinearLayout>
+                android:textOff="开启服务"
+                android:textOn="关闭服务" />
 
             <SeekBar
                 android:id="@+id/seekBar"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:max="255"
-                android:progress="255"/>
+                android:progress="255" />
+
+            <Switch
+                android:id="@+id/repeatSwitch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="5dp"
+                android:paddingStart="15dp"
+                android:text="使用复读功能"
+                android:textColor="#555555"
+                android:textSize="24dp" />
+
+            <LinearLayout
+                android:id="@+id/repeatModeView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <Button
+                    android:id="@+id/authBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="验证" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="1">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".3"
+                        android:gravity="center"
+                        android:text="Token"
+                        android:textAlignment="center"
+                        android:textSize="24dp" />
+
+                    <EditText
+                        android:id="@+id/ircToken"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight=".7"
+                        android:ems="10"
+                        android:enabled="false"
+                        android:hint="Token"
+                        android:inputType="textPassword" />
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="1">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".3"
+                        android:gravity="center"
+                        android:text="用户名"
+                        android:textAlignment="center"
+                        android:textSize="24dp" />
+
+                    <EditText
+                        android:id="@+id/ircName"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight=".7"
+                        android:ems="10"
+                        android:enabled="false"
+                        android:hint="Twitch用户名"
+                        android:inputType="text" />
+
+                </LinearLayout>
+
+            </LinearLayout>
 
             <Button
                 android:id="@+id/sendDanmaku"
@@ -89,7 +152,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:text="使用帮助：\n1. 填写主播名\n2. 开启聊天室和弹幕图层\n3. 拖动滑条控制透明度"
+                android:text="使用帮助：\n- 拖动滑条可以控制弹幕透明度\n- 复读功能需要登录Twitch帐号\n- 开启复读功能后，点击通知栏的通知以进入复读模式\n- 复读模式下，可以通过点击来复读一条弹幕\n- 复读模式下只能复读，不能进行其他操作\n- 再次点击通知栏上的通知可退出复读模式"
                 android:textSize="18dp" />
 
             <TextView

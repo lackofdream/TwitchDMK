@@ -1,7 +1,11 @@
 package com.lackofdream.lab.twitchdmk
 
+import android.content.SharedPreferences
 import android.os.Build
 import android.view.WindowManager
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_ENABLE_REPEAT
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_IRC_TOKEN
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_IRC_USERNAME
 
 class TDMKUtils {
     companion object {
@@ -14,6 +18,12 @@ class TDMKUtils {
                 windowLayoutType = WindowManager.LayoutParams.TYPE_PHONE
             }
             return windowLayoutType
+        }
+
+        fun canEnableRepeatMode(prefs: SharedPreferences): Boolean {
+            return prefs.getBoolean(PREF_ENABLE_REPEAT, false) &&
+                    !prefs.getString(PREF_IRC_TOKEN, "").isEmpty() &&
+                    !prefs.getString(PREF_IRC_USERNAME, "").isEmpty()
         }
     }
 }

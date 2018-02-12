@@ -1,5 +1,6 @@
 package com.lackofdream.lab.twitchdmk
 
+import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
@@ -14,36 +15,52 @@ import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SET_TRANSPAR
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.EXTRA_DANMAKU_SELF
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.EXTRA_DANMAKU_TEXT
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_DANMAKU_TRANSPARENCY
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_ENABLE_REPEAT
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_IRC_CHANNEL
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_IRC_ENABLED
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_IRC_TOKEN
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_IRC_USERNAME
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_OVERLAY_ENABLED
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.REQUEST_IRC_TOKEN
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.RESULT_IRC_TOKEN
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.RESULT_IRC_USERNAME
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var prefs: SharedPreferences
-    private lateinit var overlayBtn: ToggleButton
     private lateinit var sendDanmakuBtn: Button
-    private lateinit var ircBtn: ToggleButton
+    private lateinit var serviceBtn: ToggleButton
     private lateinit var ircChannel: EditText
     private lateinit var transparencyBar: SeekBar
+    private lateinit var repeatSwitch: Switch
+    private lateinit var repeatView: View
+    private lateinit var authBtn: Button
+    private lateinit var ircToken: EditText
+    private lateinit var ircName: EditText
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        when (requestCode) {
+            REQUEST_IRC_TOKEN -> {
+                if (resultCode != Activity.RESULT_OK || data == null) {
+                    return
+                }
+                prefs.edit().putString(PREF_IRC_TOKEN, "oauth:${data.getStringExtra(RESULT_IRC_TOKEN)}").apply()
+                prefs.edit().putString(PREF_IRC_USERNAME, data.getStringExtra(RESULT_IRC_USERNAME)).apply()
+                ircToken.setText(prefs.getString(PREF_IRC_TOKEN, ""))
+                ircName.setText(prefs.getString(PREF_IRC_USERNAME, ""))
+                return
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data)
+    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         prefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-        overlayBtn = findViewById(R.id.overlayBtn)
-        overlayBtn.setOnCheckedChangeListener({ _, isChecked ->
-            val intent = Intent(applicationContext, TDMKOverlayService::class.java)
-            if (isChecked) {
-                prefs.edit().putBoolean(PREF_OVERLAY_ENABLED, true).apply()
-                startService(intent)
-            } else {
-                prefs.edit().putBoolean(PREF_OVERLAY_ENABLED, false).apply()
-                stopService(intent)
-            }
-        })
 
         sendDanmakuBtn = findViewById(R.id.sendDanmaku)
         sendDanmakuBtn.setOnClickListener({ _ ->
@@ -59,20 +76,29 @@ class MainActivity : AppCompatActivity() {
         ircChannel = findViewById(R.id.ircChannel)
 
 
-        ircBtn = findViewById(R.id.ircBtn)
-        ircBtn.setOnCheckedChangeListener({ _, isChecked ->
-            val intent = Intent(applicationContext, TDMKTwitchIRCService::class.java)
+        serviceBtn = findViewById(R.id.serviceBtn)
+        serviceBtn.setOnCheckedChangeListener({ _, isChecked ->
+            val ircIntent = Intent(applicationContext, TDMKTwitchIRCService::class.java)
+            val overlayIntent = Intent(applicationContext, TDMKOverlayService::class.java)
             if (isChecked) {
+                if (ircChannel.text.isEmpty())
+                    return@setOnCheckedChangeListener
                 prefs.edit().putBoolean(PREF_IRC_ENABLED, true).apply()
-                if (ircChannel.text.isNotEmpty())
-                    prefs.edit().putString(PREF_IRC_CHANNEL, ircChannel.text.toString().toLowerCase()).apply()
+                prefs.edit().putBoolean(PREF_OVERLAY_ENABLED, true).apply()
+                prefs.edit().putString(PREF_IRC_CHANNEL, ircChannel.text.toString().toLowerCase()).apply()
+                startService(ircIntent)
+                startService(overlayIntent)
                 ircChannel.isEnabled = false
-                startService(intent)
-
+                repeatSwitch.isEnabled = false
+                authBtn.isEnabled = false
             } else {
+                prefs.edit().putBoolean(PREF_OVERLAY_ENABLED, false).apply()
                 prefs.edit().putBoolean(PREF_IRC_ENABLED, false).apply()
+                stopService(overlayIntent)
+                stopService(ircIntent)
                 ircChannel.isEnabled = true
-                stopService(intent)
+                repeatSwitch.isEnabled = true
+                authBtn.isEnabled = true
             }
         })
 
@@ -102,9 +128,28 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        repeatSwitch = findViewById(R.id.repeatSwitch)
+        repeatView = findViewById(R.id.repeatModeView)
+        authBtn = findViewById(R.id.authBtn)
+        ircToken = findViewById(R.id.ircToken)
+        ircName = findViewById(R.id.ircName)
+        repeatSwitch.setOnCheckedChangeListener({ _, isChecked ->
+            if (isChecked) {
+                prefs.edit().putBoolean(PREF_ENABLE_REPEAT, true).apply()
+                repeatView.visibility = View.VISIBLE
+            } else {
+                prefs.edit().putBoolean(PREF_ENABLE_REPEAT, false).apply()
+                repeatView.visibility = View.GONE
+            }
+        })
+        authBtn.setOnClickListener({ _ ->
+            startActivityForResult(Intent(applicationContext, TDMKTwitchAuthActivity::class.java), REQUEST_IRC_TOKEN)
+        })
     }
 
     private fun setEditText() {
+        ircToken.setText(prefs.getString(PREF_IRC_TOKEN, ""))
+        ircName.setText(prefs.getString(PREF_IRC_USERNAME, ""))
         if (ircChannel.text.isEmpty())
             ircChannel.setText(prefs.getString(PREF_IRC_CHANNEL, ""))
     }
@@ -112,18 +157,24 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         title = "老鼠弹幕"
-        overlayBtn.isChecked = prefs.getBoolean(PREF_OVERLAY_ENABLED, false)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                 !Settings.canDrawOverlays(applicationContext)) {
             findViewById<TextView>(R.id.overlayWarn).visibility = View.VISIBLE
             prefs.edit().putBoolean(PREF_OVERLAY_ENABLED, false).apply()
-            overlayBtn.isEnabled = false
+            serviceBtn.isEnabled = false
+            repeatSwitch.isEnabled = false
+            return
         } else {
             findViewById<TextView>(R.id.overlayWarn).visibility = View.GONE
-            overlayBtn.isEnabled = true
+            serviceBtn.isEnabled = true
+            repeatSwitch.isEnabled = true
         }
-        ircBtn.isChecked = prefs.getBoolean(PREF_IRC_ENABLED, false)
+        val serviceEnabled = prefs.getBoolean(PREF_IRC_ENABLED, false)
+        serviceBtn.isChecked = serviceEnabled
+        authBtn.isEnabled = !serviceEnabled
+        repeatSwitch.isEnabled = !serviceEnabled
         transparencyBar.progress = prefs.getInt(PREF_DANMAKU_TRANSPARENCY, 255)
+        repeatSwitch.isChecked = prefs.getBoolean(PREF_ENABLE_REPEAT, false)
         setEditText()
     }
 }

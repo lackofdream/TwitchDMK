@@ -12,19 +12,23 @@ import android.os.IBinder
 import android.preference.PreferenceManager
 import android.provider.Settings
 import android.util.Log
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_DISABLE_REPEAT_MODE
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_ENABLE_REPEAT_MODE
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_HIDE_OVERLAY
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SEND_DANMAKU
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SEND_IRC_MESSAGE
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SET_TRANSPARENCY
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SHOW_OVERLAY
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.EXTRA_DANMAKU_SELF
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.EXTRA_DANMAKU_TEXT
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.EXTRA_MESSAGE_TEXT
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_DANMAKU_TRANSPARENCY
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_OVERLAY_ENABLED
 import com.lackofdream.lab.twitchdmk.TDMKUtils.Companion.getWindowLayoutType
+import master.flame.danmaku.controller.IDanmakuView
 import master.flame.danmaku.danmaku.model.BaseDanmaku
 import master.flame.danmaku.danmaku.model.DanmakuTimer
 import master.flame.danmaku.danmaku.model.IDanmakus
@@ -43,12 +47,21 @@ class TDMKOverlayService : Service() {
     }
 
     private lateinit var mView: View
-    private lateinit var mInflater: LayoutInflater
-    private lateinit var mManager: WindowManager
-    private lateinit var mParams: WindowManager.LayoutParams
-    private lateinit var mDanmakuContext: DanmakuContext
-    private lateinit var mDanmakuView: DanmakuView
+    private lateinit var layoutInflater: LayoutInflater
+    private lateinit var windowManager: WindowManager
+    private lateinit var danmakuContext: DanmakuContext
+    private lateinit var danmakuView: DanmakuView
     private lateinit var prefs: SharedPreferences
+
+    private fun getViewLayoutParams(canTouch: Boolean): WindowManager.LayoutParams {
+        return WindowManager.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.MATCH_PARENT,
+                getWindowLayoutType(),
+                if (canTouch) WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE else
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                PixelFormat.TRANSLUCENT)
+    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
@@ -72,8 +85,18 @@ class TDMKOverlayService : Service() {
                     addDanmaku(text, self)
                 }
                 ACTION_SET_TRANSPARENCY -> {
-                    mDanmakuContext.setDanmakuTransparency(prefs.getInt(PREF_DANMAKU_TRANSPARENCY, 255).toFloat() / 255f)
+                    danmakuContext.setDanmakuTransparency(prefs.getInt(PREF_DANMAKU_TRANSPARENCY, 255).toFloat() / 255f)
                     addDanmaku("透明度已变更", true)
+                }
+                ACTION_ENABLE_REPEAT_MODE -> {
+                    windowManager.updateViewLayout(mView, getViewLayoutParams(true))
+                    startService(Intent(applicationContext, TDMKTwitchIRCService::class.java)
+                            .setAction(ACTION_ENABLE_REPEAT_MODE))
+                }
+                ACTION_DISABLE_REPEAT_MODE -> {
+                    windowManager.updateViewLayout(mView, getViewLayoutParams(false))
+                    startService(Intent(applicationContext, TDMKTwitchIRCService::class.java)
+                            .setAction(ACTION_DISABLE_REPEAT_MODE))
                 }
             }
         }
@@ -87,15 +110,35 @@ class TDMKOverlayService : Service() {
         overlappingEnablePair.put(BaseDanmaku.TYPE_SCROLL_RL, true)
         overlappingEnablePair.put(BaseDanmaku.TYPE_FIX_TOP, true)
 
-        mDanmakuView = mView.findViewById(R.id.danmaku)
-        mDanmakuContext = DanmakuContext.create()
+        danmakuView = mView.findViewById(R.id.danmaku)
+        danmakuContext = DanmakuContext.create()
                 .setDanmakuStyle(IDisplayer.DANMAKU_STYLE_STROKEN, 3f * (resources.displayMetrics.density - 0.6f))
                 .setDuplicateMergingEnabled(false)
                 .setScrollSpeedFactor(1.2f)
                 .setScaleTextSize(1.2f)
                 .preventOverlapping(overlappingEnablePair)
                 .setDanmakuTransparency(prefs.getInt(PREF_DANMAKU_TRANSPARENCY, 255).toFloat() / 255f)
-        mDanmakuView.setCallback(object : master.flame.danmaku.controller.DrawHandler.Callback {
+        danmakuView.onDanmakuClickListener = object : IDanmakuView.OnDanmakuClickListener {
+            override fun onDanmakuClick(danmakus: IDanmakus?): Boolean {
+                if (danmakus == null) return false
+                val danmaku = danmakus.first()
+                Log.i("TDMK-DANMAKU-CLICK", danmaku.text.toString())
+                addDanmaku(danmaku.text, true)
+                startService(Intent(applicationContext, TDMKTwitchIRCService::class.java).
+                        putExtra(EXTRA_MESSAGE_TEXT, danmaku.text.toString()).
+                        setAction(ACTION_SEND_IRC_MESSAGE))
+                return true
+            }
+
+            override fun onViewClick(view: IDanmakuView?): Boolean {
+                return false
+            }
+
+            override fun onDanmakuLongClick(danmakus: IDanmakus?): Boolean {
+                return false
+            }
+        }
+        danmakuView.setCallback(object : master.flame.danmaku.controller.DrawHandler.Callback {
             override fun drawingFinished() {
             }
 
@@ -103,24 +146,24 @@ class TDMKOverlayService : Service() {
             }
 
             override fun prepared() {
-                mDanmakuView.start()
+                danmakuView.start()
             }
 
             override fun updateTimer(timer: DanmakuTimer?) {
             }
         })
 
-        mDanmakuView.prepare(object : BaseDanmakuParser() {
+        danmakuView.prepare(object : BaseDanmakuParser() {
             override fun parse(): IDanmakus {
                 return Danmakus()
             }
-        }, mDanmakuContext)
+        }, danmakuContext)
 
         Timer().schedule(object : TimerTask() {
             override fun run() {
                 addDanmaku("弹幕图层准备就绪", true)
             }
-        }, 200)
+        }, 500)
     }
 
     @SuppressLint("InflateParams")
@@ -138,35 +181,28 @@ class TDMKOverlayService : Service() {
             return
         }
         dmk_service_on = true
-        mParams = WindowManager.LayoutParams(
-                WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.MATCH_PARENT,
-                getWindowLayoutType(),
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                PixelFormat.TRANSLUCENT)
-        mParams.gravity = Gravity.TOP or Gravity.START
-        mManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        mInflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        mView = mInflater.inflate(R.layout.danmaku_overlay, null)
+        windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        layoutInflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        mView = layoutInflater.inflate(R.layout.danmaku_overlay, null)
 
-        mManager.addView(mView, mParams)
+        windowManager.addView(mView, getViewLayoutParams(false))
         initDanmakuConfig()
     }
 
 
     private fun addDanmaku(text: CharSequence, self: Boolean = false) {
-        val danmaku = mDanmakuContext.mDanmakuFactory.createDanmaku(BaseDanmaku.TYPE_SCROLL_RL) ?: return
+        val danmaku = danmakuContext.mDanmakuFactory.createDanmaku(BaseDanmaku.TYPE_SCROLL_RL) ?: return
 
         danmaku.text = text
         danmaku.padding = 3
         danmaku.priority = if (self) 1 else 0
         danmaku.isLive = true
-        danmaku.time = mDanmakuView.currentTime
+        danmaku.time = danmakuView.currentTime
         danmaku.textSize = 28f * (resources.displayMetrics.density - 0.6f)
         danmaku.textColor = Color.WHITE
         danmaku.textShadowColor = Color.BLACK
         if (self) danmaku.borderColor = Color.GREEN
-        mDanmakuView.addDanmaku(danmaku)
+        danmakuView.addDanmaku(danmaku)
     }
 
     override fun onBind(intent: Intent): IBinder? {
@@ -176,9 +212,8 @@ class TDMKOverlayService : Service() {
     override fun onDestroy() {
         dmk_service_on = false
         try {
-
-            mDanmakuView.release()
-            mManager.removeView(mView)
+            danmakuView.release()
+            windowManager.removeView(mView)
         } catch (e: UninitializedPropertyAccessException) {
 
         }
