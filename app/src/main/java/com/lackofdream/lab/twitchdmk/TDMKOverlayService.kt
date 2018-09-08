@@ -21,12 +21,14 @@ import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_HIDE_OVERLAY
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SEND_DANMAKU
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SEND_IRC_MESSAGE
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SET_FONT_SIZE
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SET_SPEED
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SET_TRANSPARENCY
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SHOW_OVERLAY
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.EXTRA_DANMAKU_SELF
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.EXTRA_DANMAKU_TEXT
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.EXTRA_MESSAGE_TEXT
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_DANMAKU_FONT_SIZE
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_DANMAKU_SPEED
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_DANMAKU_TRANSPARENCY
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_OVERLAY_ENABLED
 import com.lackofdream.lab.twitchdmk.TDMKUtils.Companion.getWindowLayoutType
@@ -94,6 +96,10 @@ class TDMKOverlayService : Service() {
                     danmakuContext.setScaleTextSize(prefs.getFloat(PREF_DANMAKU_FONT_SIZE, 1.2f))
                     addDanmaku("字体大小已变更", true)
                 }
+                ACTION_SET_SPEED -> {
+                    danmakuContext.setScrollSpeedFactor(prefs.getFloat(PREF_DANMAKU_SPEED, 1.2f))
+                    addDanmaku("滚动速度已变更", true)
+                }
                 ACTION_ENABLE_REPEAT_MODE -> {
                     windowManager.updateViewLayout(mView, getViewLayoutParams(true))
                     startService(Intent(applicationContext, TDMKTwitchIRCService::class.java)
@@ -120,8 +126,8 @@ class TDMKOverlayService : Service() {
         danmakuContext = DanmakuContext.create()
                 .setDanmakuStyle(IDisplayer.DANMAKU_STYLE_STROKEN, 3f * (resources.displayMetrics.density - 0.6f))
                 .setDuplicateMergingEnabled(false)
-                .setScrollSpeedFactor(1.2f)
-                .setScaleTextSize(1.2f)
+                .setScrollSpeedFactor(prefs.getFloat(PREF_DANMAKU_SPEED, 1.2f))
+                .setScaleTextSize(prefs.getFloat(PREF_DANMAKU_FONT_SIZE, 1.2f))
                 .preventOverlapping(overlappingEnablePair)
                 .setDanmakuTransparency(prefs.getInt(PREF_DANMAKU_TRANSPARENCY, 255).toFloat() / 255f)
         danmakuView.onDanmakuClickListener = object : IDanmakuView.OnDanmakuClickListener {
@@ -130,9 +136,7 @@ class TDMKOverlayService : Service() {
                 val danmaku = danmakus.first()
                 Log.i("TDMK-DANMAKU-CLICK", danmaku.text.toString())
                 addDanmaku(danmaku.text, true)
-                startService(Intent(applicationContext, TDMKTwitchIRCService::class.java).
-                        putExtra(EXTRA_MESSAGE_TEXT, danmaku.text.toString()).
-                        setAction(ACTION_SEND_IRC_MESSAGE))
+                startService(Intent(applicationContext, TDMKTwitchIRCService::class.java).putExtra(EXTRA_MESSAGE_TEXT, danmaku.text.toString()).setAction(ACTION_SEND_IRC_MESSAGE))
                 return true
             }
 
@@ -197,7 +201,8 @@ class TDMKOverlayService : Service() {
 
 
     private fun addDanmaku(text: CharSequence, self: Boolean = false) {
-        val danmaku = danmakuContext.mDanmakuFactory.createDanmaku(BaseDanmaku.TYPE_SCROLL_RL) ?: return
+        val danmaku = danmakuContext.mDanmakuFactory.createDanmaku(BaseDanmaku.TYPE_SCROLL_RL)
+                ?: return
 
         danmaku.text = text
         danmaku.padding = 3

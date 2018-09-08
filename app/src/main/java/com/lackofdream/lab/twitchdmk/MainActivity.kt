@@ -12,10 +12,12 @@ import android.view.View
 import android.widget.*
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SEND_DANMAKU
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SET_FONT_SIZE
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SET_SPEED
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SET_TRANSPARENCY
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.EXTRA_DANMAKU_SELF
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.EXTRA_DANMAKU_TEXT
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_DANMAKU_FONT_SIZE
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_DANMAKU_SPEED
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_DANMAKU_TRANSPARENCY
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_ENABLE_REPEAT
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_IRC_CHANNEL
@@ -36,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var ircChannel: EditText
     private lateinit var transparencyBar: SeekBar
     private lateinit var fontSizeBar: SeekBar
+    private lateinit var speedBar: SeekBar
     private lateinit var repeatSwitch: Switch
     private lateinit var repeatView: View
     private lateinit var authBtn: Button
@@ -156,6 +159,30 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        speedBar = findViewById(R.id.seekBar3)
+        speedBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+            private var timer = Timer()
+
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    prefs.edit().putFloat(PREF_DANMAKU_SPEED, 1.5f - progress.toFloat()/10).apply()
+                    val intent = Intent(applicationContext, TDMKOverlayService::class.java).setAction(ACTION_SET_SPEED)
+                    timer.cancel()
+                    timer = Timer()
+                    timer.schedule(object: TimerTask() {
+                        override fun run() {
+                            startService(intent)
+                        }
+                    }, 200)
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+            }
+        })
 
         repeatSwitch = findViewById(R.id.repeatSwitch)
         repeatView = findViewById(R.id.repeatModeView)

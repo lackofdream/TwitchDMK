@@ -7,6 +7,7 @@ class TDMKConstants {
         const val PREF_IRC_CHANNEL = "prefIRCChannel"
         const val PREF_DANMAKU_TRANSPARENCY = "prefDanmakuTransparency"
         const val PREF_DANMAKU_FONT_SIZE = "prefDanmakuFontSize"
+        const val PREF_DANMAKU_SPEED = "prefDanmakuSpeed"
         const val PREF_ENABLE_REPEAT = "prefEnableRepeat"
         const val PREF_IRC_TOKEN = "prefIRCToken"
         const val PREF_IRC_USERNAME = "prefIRCUsername"
@@ -20,6 +21,7 @@ class TDMKConstants {
 
         const val ACTION_SET_TRANSPARENCY = "actionSetTransparency"
         const val ACTION_SET_FONT_SIZE = "actionSetFontSize"
+        const val ACTION_SET_SPEED = "actionSetSpeed"
 
         const val ACTION_ENABLE_REPEAT_MODE = "actionEnableRepeatMode"
         const val ACTION_DISABLE_REPEAT_MODE = "actionDisableRepeatMode"

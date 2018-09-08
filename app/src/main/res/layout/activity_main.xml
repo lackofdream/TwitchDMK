@@ -79,6 +79,19 @@
                 android:max="10"
                 android:progress="7" />
 
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="速度" />
+
+            <SeekBar
+                android:id="@+id/seekBar3"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:max="10"
+                android:progress="3" />
+
             <Switch
                 android:id="@+id/repeatSwitch"
                 android:layout_width="match_parent"
