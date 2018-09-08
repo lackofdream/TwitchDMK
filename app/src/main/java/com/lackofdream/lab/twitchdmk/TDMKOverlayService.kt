@@ -107,8 +107,8 @@ class TDMKOverlayService : Service() {
     @SuppressLint("UseSparseArrays")
     private fun initDanmakuConfig() {
         val overlappingEnablePair = HashMap<Int, Boolean>()
-        overlappingEnablePair.put(BaseDanmaku.TYPE_SCROLL_RL, true)
-        overlappingEnablePair.put(BaseDanmaku.TYPE_FIX_TOP, true)
+        overlappingEnablePair[BaseDanmaku.TYPE_SCROLL_RL] = true
+        overlappingEnablePair[BaseDanmaku.TYPE_FIX_TOP] = true
 
         danmakuView = mView.findViewById(R.id.danmaku)
         danmakuContext = DanmakuContext.create()

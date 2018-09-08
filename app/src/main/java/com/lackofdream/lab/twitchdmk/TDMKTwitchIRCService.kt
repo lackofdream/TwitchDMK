@@ -75,8 +75,8 @@ class SendIRCMessageTask(bot: PircBotX) : IRCTask(bot) {
 class TDMKTwitchIRCService : Service() {
 
     companion object {
-        private val NOTIFY_ID = 1
-        private val NOTIFY_CHANNEL_ID = "twitch_irc_01"
+        private const val NOTIFY_ID = 1
+        private const val NOTIFY_CHANNEL_ID = "twitch_irc_01"
         var irc_service_on = false
         var repeat_mode_on = false
     }

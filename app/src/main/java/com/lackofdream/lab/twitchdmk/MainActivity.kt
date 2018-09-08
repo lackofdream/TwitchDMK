@@ -63,21 +63,21 @@ class MainActivity : AppCompatActivity() {
         prefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
 
         sendDanmakuBtn = findViewById(R.id.sendDanmaku)
-        sendDanmakuBtn.setOnClickListener({ _ ->
+        sendDanmakuBtn.setOnClickListener { _ ->
             val danmakuIntent = Intent(applicationContext, TDMKOverlayService::class.java).putExtra(EXTRA_DANMAKU_TEXT, "対潜部隊との訓練もいいけど、大事な実戦にも出てみたい！　ねぇ、提督？　聞いてる？　むー、聞いてなーい！").setAction(ACTION_SEND_DANMAKU).putExtra(EXTRA_DANMAKU_SELF, true)
             startService(danmakuIntent)
-        })
+        }
 
-        findViewById<TextView>(R.id.easterEgg).setOnLongClickListener({ _ ->
+        findViewById<TextView>(R.id.easterEgg).setOnLongClickListener { _ ->
             sendDanmakuBtn.visibility = View.VISIBLE
             true
-        })
+        }
 
         ircChannel = findViewById(R.id.ircChannel)
 
 
         serviceBtn = findViewById(R.id.serviceBtn)
-        serviceBtn.setOnCheckedChangeListener({ _, isChecked ->
+        serviceBtn.setOnCheckedChangeListener { _, isChecked ->
             val ircIntent = Intent(applicationContext, TDMKTwitchIRCService::class.java)
             val overlayIntent = Intent(applicationContext, TDMKOverlayService::class.java)
             if (isChecked) {
@@ -100,7 +100,7 @@ class MainActivity : AppCompatActivity() {
                 repeatSwitch.isEnabled = true
                 authBtn.isEnabled = true
             }
-        })
+        }
 
         transparencyBar = findViewById(R.id.seekBar)
         transparencyBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -133,7 +133,7 @@ class MainActivity : AppCompatActivity() {
         authBtn = findViewById(R.id.authBtn)
         ircToken = findViewById(R.id.ircToken)
         ircName = findViewById(R.id.ircName)
-        repeatSwitch.setOnCheckedChangeListener({ _, isChecked ->
+        repeatSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 prefs.edit().putBoolean(PREF_ENABLE_REPEAT, true).apply()
                 repeatView.visibility = View.VISIBLE
@@ -141,10 +141,10 @@ class MainActivity : AppCompatActivity() {
                 prefs.edit().putBoolean(PREF_ENABLE_REPEAT, false).apply()
                 repeatView.visibility = View.GONE
             }
-        })
-        authBtn.setOnClickListener({ _ ->
+        }
+        authBtn.setOnClickListener { _ ->
             startActivityForResult(Intent(applicationContext, TDMKTwitchAuthActivity::class.java), REQUEST_IRC_TOKEN)
-        })
+        }
     }
 
     private fun setEditText() {
