@@ -20,11 +20,13 @@ import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_ENABLE_REPEA
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_HIDE_OVERLAY
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SEND_DANMAKU
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SEND_IRC_MESSAGE
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SET_FONT_SIZE
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SET_TRANSPARENCY
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.ACTION_SHOW_OVERLAY
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.EXTRA_DANMAKU_SELF
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.EXTRA_DANMAKU_TEXT
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.EXTRA_MESSAGE_TEXT
+import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_DANMAKU_FONT_SIZE
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_DANMAKU_TRANSPARENCY
 import com.lackofdream.lab.twitchdmk.TDMKConstants.Companion.PREF_OVERLAY_ENABLED
 import com.lackofdream.lab.twitchdmk.TDMKUtils.Companion.getWindowLayoutType
@@ -87,6 +89,10 @@ class TDMKOverlayService : Service() {
                 ACTION_SET_TRANSPARENCY -> {
                     danmakuContext.setDanmakuTransparency(prefs.getInt(PREF_DANMAKU_TRANSPARENCY, 255).toFloat() / 255f)
                     addDanmaku("透明度已变更", true)
+                }
+                ACTION_SET_FONT_SIZE -> {
+                    danmakuContext.setScaleTextSize(prefs.getFloat(PREF_DANMAKU_FONT_SIZE, 1.2f))
+                    addDanmaku("字体大小已变更", true)
                 }
                 ACTION_ENABLE_REPEAT_MODE -> {
                     windowManager.updateViewLayout(mView, getViewLayoutParams(true))

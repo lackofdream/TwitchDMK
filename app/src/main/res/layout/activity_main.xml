@@ -53,12 +53,31 @@
                 android:textOff="开启服务"
                 android:textOn="关闭服务" />
 
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="透明度" />
+
             <SeekBar
                 android:id="@+id/seekBar"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:max="255"
                 android:progress="255" />
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="字号" />
+
+            <SeekBar
+                android:id="@+id/seekBar2"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:max="10"
+                android:progress="7" />
 
             <Switch
                 android:id="@+id/repeatSwitch"
